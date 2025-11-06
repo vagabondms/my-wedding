@@ -51,9 +51,46 @@ launchctl load ~/Library/LaunchAgents/com.wedding.checker.plist
 cat logs/wedding-alerts.log
 ```
 
+## GitHub Actions를 사용한 자동 실행
+
+프로젝트에는 GitHub Actions 워크플로우가 포함되어 있어, 매일 한국시간 오전 9시에 자동으로 실행됩니다.
+
+### 설정 방법
+
+1. **GitHub Secrets 설정**
+
+   이메일 알림을 받으려면 GitHub 저장소의 Secrets에 다음 값을 설정해야 합니다:
+
+   - 저장소 페이지로 이동
+   - Settings → Secrets and variables → Actions
+   - New repository secret 클릭
+   - 다음 두 개의 Secret 추가:
+     - `EMAIL_USER`: Gmail 주소 (예: `your-email@gmail.com`)
+     - `EMAIL_PASS`: Gmail 앱 비밀번호
+
+2. **Gmail 앱 비밀번호 생성 방법**
+
+   - Google 계정 관리 페이지 접속
+   - 보안 설정으로 이동
+   - 2단계 인증 활성화 (필수)
+   - 앱 비밀번호 생성
+   - 생성된 비밀번호를 `EMAIL_PASS`에 입력
+
+3. **워크플로우 확인**
+
+   - Actions 탭에서 워크플로우 실행 상태 확인 가능
+   - 매일 한국시간 오전 9시 (UTC 0시)에 자동 실행
+   - 수동 실행도 가능 (Actions 탭 → Wedding Checker Scheduled Run → Run workflow)
+
+### 로컬 실행 vs GitHub Actions
+
+- **로컬 실행**: `npm start`로 실행하면 cron 스케줄러가 활성화되어 매일 오전 9시에 자동 실행
+- **GitHub Actions**: 워크플로우가 자동으로 실행되며, 별도 서버 없이 GitHub에서 관리
+
 ## 특징
 
-- ✅ **외부 서비스 불필요** - 완전히 로컬에서 동작
-- ✅ **macOS 네이티브 알림** - 시스템 알림 사용
-- ✅ **자동 로그 저장** - 모든 발견 기록 보관
-- ✅ **매일 오전 9시 자동 확인** - 스케줄링 내장
+- ✅ **로컬 및 클라우드 지원** - 로컬 실행 또는 GitHub Actions 사용 가능
+- ✅ **자동 스케줄링** - 매일 오전 9시 자동 확인
+- ✅ **이메일 알림** - 27년 이후 일정 발견 시 즉시 알림
+- ✅ **macOS 네이티브 알림** - 로컬 실행 시 시스템 알림 사용 (선택사항)
+- ✅ **자동 로그 저장** - 모든 발견 기록 보관 (로컬 실행 시)

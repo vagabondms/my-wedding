@@ -3,7 +3,11 @@ import cron from "node-cron";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
-dotenv.config();
+// GitHub Actions 환경이 아닐 때만 .env 파일 로드
+const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
+if (!isGitHubActions) {
+  dotenv.config();
+}
 
 const TARGET_URL = "https://wedding.seoulwomen.or.kr/intro";
 const EMAIL_RECIPIENTS = ["hiseokseok@gmail.com", "h_____in2@naver.com"];
@@ -11,9 +15,10 @@ const EMAIL_RECIPIENTS = ["hiseokseok@gmail.com", "h_____in2@naver.com"];
 // Gmail 전송 설정
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error(
-      "이메일 전송을 위해 .env 파일에 EMAIL_USER와 EMAIL_PASS를 설정해주세요."
-    );
+    const envHint = isGitHubActions
+      ? "GitHub Secrets에 EMAIL_USER와 EMAIL_PASS를 설정해주세요."
+      : ".env 파일에 EMAIL_USER와 EMAIL_PASS를 설정해주세요.";
+    throw new Error(`이메일 전송을 위해 ${envHint}`);
   }
 
   return nodemailer.createTransport({
@@ -175,42 +180,65 @@ async function sendEmail(years, found = true) {
       console.error("\n" + "=".repeat(60));
       console.error("⚠️  Gmail 계정 설정이 필요합니다!");
       console.error("=".repeat(60));
-      console.error("\n.env 파일을 생성하고 다음을 추가하세요:");
-      console.error("  EMAIL_USER=your-email@gmail.com");
-      console.error("  EMAIL_PASS=your-app-password");
+
+      if (isGitHubActions) {
+        console.error("\nGitHub Secrets에 다음을 설정하세요:");
+        console.error("  EMAIL_USER: your-email@gmail.com");
+        console.error("  EMAIL_PASS: your-app-password");
+        console.error("\n설정 방법:");
+        console.error(
+          "  1. GitHub 저장소 → Settings → Secrets and variables → Actions"
+        );
+        console.error("  2. New repository secret 클릭");
+        console.error("  3. 위의 두 개의 Secret 추가");
+      } else {
+        console.error("\n.env 파일을 생성하고 다음을 추가하세요:");
+        console.error("  EMAIL_USER=your-email@gmail.com");
+        console.error("  EMAIL_PASS=your-app-password");
+      }
+
       console.error("\nGmail 앱 비밀번호 생성 방법:");
       console.error("  1. Google 계정 관리 페이지 접속");
       console.error("  2. 보안 설정으로 이동");
       console.error("  3. 2단계 인증 활성화 (필수)");
       console.error("  4. 앱 비밀번호 생성");
-      console.error("  5. 생성된 비밀번호를 EMAIL_PASS에 입력");
+      console.error("  5. 생성된 비밀번호를 설정에 입력");
       console.error("=".repeat(60) + "\n");
     }
   }
 }
 
-// 스케줄러 설정 (매일 오전 9시 실행)
-// cron 표현식: '0 9 * * *' = 매일 오전 9시 0분
-cron.schedule(
-  "0 9 * * *",
-  async () => {
-    console.log(`[${new Date().toLocaleString("ko-KR")}] 스케줄된 작업 시작`);
-    await checkWebsite();
-  },
-  {
-    timezone: "Asia/Seoul",
-  }
-);
-
-// 시작 시 한 번 실행 (테스트용)
-console.log("서울여성가족재단 예식장 체커가 시작되었습니다.");
-console.log("매일 오전 9시에 자동으로 확인합니다.");
-console.log("테스트를 위해 지금 한 번 실행합니다...");
-
-await checkWebsite();
-
-// 프로세스가 종료되지 않도록 유지
-process.on("SIGINT", () => {
-  console.log("\n프로그램을 종료합니다...");
+if (isGitHubActions) {
+  // GitHub Actions 환경: 한 번만 실행하고 종료
+  console.log("GitHub Actions 환경에서 실행 중...");
+  console.log("서울여성가족재단 예식장 체커를 실행합니다.");
+  await checkWebsite();
   process.exit(0);
-});
+} else {
+  // 로컬 환경: cron 스케줄러 사용
+  // 스케줄러 설정 (매일 오전 9시 실행)
+  // cron 표현식: '0 9 * * *' = 매일 오전 9시 0분
+  cron.schedule(
+    "0 9 * * *",
+    async () => {
+      console.log(`[${new Date().toLocaleString("ko-KR")}] 스케줄된 작업 시작`);
+      await checkWebsite();
+    },
+    {
+      timezone: "Asia/Seoul",
+    }
+  );
+
+  // 시작 시 한 번 실행 (테스트용)
+  console.log("서울여성가족재단 예식장 체커가 시작되었습니다.");
+  console.log("매일 오전 9시에 자동으로 확인합니다.");
+  console.log("테스트를 위해 지금 한 번 실행합니다...");
+
+  await checkWebsite();
+
+  // 프로세스가 종료되지 않도록 유지
+  process.on("SIGINT", () => {
+    console.log("\n프로그램을 종료합니다...");
+    process.exit(0);
+  });
+}
