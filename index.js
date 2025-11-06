@@ -224,12 +224,59 @@ if (isGitHubActions) {
   process.exit(0);
 } else {
   // 로컬 환경: cron 스케줄러 사용
-  // 스케줄러 설정 (매일 오전 9시 실행)
-  // cron 표현식: '0 9 * * *' = 매일 오전 9시 0분
+  // 스케줄러 설정 (매일 오전 8시 실행)
   cron.schedule(
-    "0 9 * * *",
+    "0 8 * * *",
     async () => {
-      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작`);
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작 (오전 8시)`);
+      await checkWebsite();
+    },
+    {
+      timezone: "Asia/Seoul",
+    }
+  );
+
+  // 스케줄러 설정 (매일 정오 12시 실행)
+  cron.schedule(
+    "0 12 * * *",
+    async () => {
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작 (정오 12시)`);
+      await checkWebsite();
+    },
+    {
+      timezone: "Asia/Seoul",
+    }
+  );
+
+  // 스케줄러 설정 (매일 오후 4시 실행)
+  cron.schedule(
+    "0 16 * * *",
+    async () => {
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작 (오후 4시)`);
+      await checkWebsite();
+    },
+    {
+      timezone: "Asia/Seoul",
+    }
+  );
+
+  // 스케줄러 설정 (매일 오후 8시 실행)
+  cron.schedule(
+    "0 20 * * *",
+    async () => {
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작 (오후 8시)`);
+      await checkWebsite();
+    },
+    {
+      timezone: "Asia/Seoul",
+    }
+  );
+
+  // 스케줄러 설정 (매일 자정 12시 실행)
+  cron.schedule(
+    "0 0 * * *",
+    async () => {
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작 (자정 12시)`);
       await checkWebsite();
     },
     {
@@ -239,7 +286,7 @@ if (isGitHubActions) {
 
   // 시작 시 한 번 실행 (테스트용)
   console.log("서울여성가족재단 예식장 체커가 시작되었습니다.");
-  console.log("매일 오전 9시에 자동으로 확인합니다.");
+  console.log("매일 오전 8시, 정오 12시, 오후 4시, 오후 8시, 자정 12시에 자동으로 확인합니다.");
   console.log("테스트를 위해 지금 한 번 실행합니다...");
 
   await checkWebsite();

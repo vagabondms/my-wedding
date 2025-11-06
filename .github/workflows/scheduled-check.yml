@@ -2,8 +2,16 @@ name: Wedding Checker Scheduled Run
 
 on:
   schedule:
-    # 매일 한국시간 오전 9시 실행 (UTC 0시)
-    - cron: '0 0 * * *'
+    # 매일 한국시간 오전 8시 실행 (UTC 23시, 전날)
+    - cron: '0 23 * * *'
+    # 매일 한국시간 정오 12시 실행 (UTC 3시)
+    - cron: '0 3 * * *'
+    # 매일 한국시간 오후 4시 실행 (UTC 7시)
+    - cron: '0 7 * * *'
+    # 매일 한국시간 오후 8시 실행 (UTC 11시)
+    - cron: '0 11 * * *'
+    # 매일 한국시간 자정 12시 실행 (UTC 15시)
+    - cron: '0 15 * * *'
   workflow_dispatch: # 수동 실행도 가능하도록 설정
 
 jobs:
