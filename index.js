@@ -12,6 +12,20 @@ if (!isGitHubActions) {
 const TARGET_URL = "https://wedding.seoulwomen.or.kr/intro";
 const EMAIL_RECIPIENTS = ["hiseokseok@gmail.com", "h_____in2@naver.com"];
 
+// 한국 시간대(Asia/Seoul)로 시간 포맷팅
+const getKoreanTime = () => {
+  return new Date().toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+};
+
 // Gmail 전송 설정
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -34,7 +48,7 @@ const createTransporter = () => {
 async function checkWebsite() {
   let browser;
   try {
-    console.log(`[${new Date().toLocaleString("ko-KR")}] 크롤링 시작...`);
+    console.log(`[${getKoreanTime()}] 크롤링 시작...`);
 
     browser = await puppeteer.launch({
       headless: true,
@@ -62,9 +76,7 @@ async function checkWebsite() {
     if (matches) {
       const uniqueYears = [...new Set(matches)];
       console.log(
-        `[${new Date().toLocaleString(
-          "ko-KR"
-        )}] 발견된 연도: ${uniqueYears.join(", ")}`
+        `[${getKoreanTime()}] 발견된 연도: ${uniqueYears.join(", ")}`
       );
 
       // 2027년 이후 또는 27년 이후만 필터링 (2026년, 26년 제외)
@@ -84,9 +96,7 @@ async function checkWebsite() {
     }
 
     console.log(
-      `[${new Date().toLocaleString(
-        "ko-KR"
-      )}] 27년 이후 연도가 발견되지 않았습니다.`
+      `[${getKoreanTime()}] 27년 이후 연도가 발견되지 않았습니다.`
     );
 
     // 발견되지 않았을 때도 이메일 전송
@@ -94,7 +104,7 @@ async function checkWebsite() {
     return false;
   } catch (error) {
     console.error(
-      `[${new Date().toLocaleString("ko-KR")}] 크롤링 오류:`,
+      `[${getKoreanTime()}] 크롤링 오류:`,
       error
     );
     return false;
@@ -127,7 +137,7 @@ async function sendEmail(years, found = true) {
 
 발견된 연도: ${years.join(", ")}
 
-확인 시간: ${new Date().toLocaleString("ko-KR")}
+확인 시간: ${getKoreanTime()}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -153,7 +163,7 @@ async function sendEmail(years, found = true) {
 
 현재 상태: 26년까지만 일정이 공개되어 있습니다.
 
-확인 시간: ${new Date().toLocaleString("ko-KR")}
+확인 시간: ${getKoreanTime()}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -167,13 +177,11 @@ async function sendEmail(years, found = true) {
 
     await transporter.sendMail(mailOptions);
     console.log(
-      `[${new Date().toLocaleString(
-        "ko-KR"
-      )}] 이메일 전송 완료: ${EMAIL_RECIPIENTS.join(", ")}`
+      `[${getKoreanTime()}] 이메일 전송 완료: ${EMAIL_RECIPIENTS.join(", ")}`
     );
   } catch (error) {
     console.error(
-      `[${new Date().toLocaleString("ko-KR")}] 이메일 전송 오류:`,
+      `[${getKoreanTime()}] 이메일 전송 오류:`,
       error.message
     );
     if (error.message.includes("이메일 전송을 위해")) {
@@ -221,7 +229,7 @@ if (isGitHubActions) {
   cron.schedule(
     "0 9 * * *",
     async () => {
-      console.log(`[${new Date().toLocaleString("ko-KR")}] 스케줄된 작업 시작`);
+      console.log(`[${getKoreanTime()}] 스케줄된 작업 시작`);
       await checkWebsite();
     },
     {
