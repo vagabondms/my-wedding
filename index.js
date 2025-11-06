@@ -66,7 +66,10 @@ async function checkWebsite() {
       const yearsAfter2027 = uniqueYears.filter((year) => {
         const yearNum = parseInt(year.replace(/[^0-9]/g, ""));
         // 4자리 연도는 2027 이상, 2자리 연도는 27 이상
-        return (yearNum >= 2027 && yearNum <= 2050) || (yearNum >= 27 && yearNum <= 50);
+        return (
+          (yearNum >= 2027 && yearNum <= 2050) ||
+          (yearNum >= 27 && yearNum <= 50)
+        );
       });
 
       if (yearsAfter2027.length > 0) {
